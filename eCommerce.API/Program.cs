@@ -20,6 +20,20 @@ builder.Services.AddControllers()
 // Add auto FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 
+// Enable Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{  
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.WithOrigins("http://localhost:4200") // Allow requests from this origin
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 // Build the web application
 var app = builder.Build();
 
@@ -28,8 +42,13 @@ app.UseExceptionHandlingMiddleware();
 
 // Enable routing
 app.UseRouting();
+app.UseSwagger(); // Adds endpoint that can serve the swagger.json
+app.UseSwaggerUI(); // Adds the Swagger UI
+
+app.UseCors();
 
 // Enable authentication and authorization
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
