@@ -12,12 +12,26 @@ public static class ApplicationUserMapperExtension
     {
         return new AuthenticationResponse
         (
-            user.UserId,
+            user.UserID,
             user.Email,
             user.PersonName,
             user.Gender,
             token,
             success
+        );
+    }
+
+    /// <summary>
+    /// Adds the extension method to map an ApplicationUser to a UserDTO object
+    /// </summary>
+    public static UserDTO MapToUserDTO(this ApplicationUser user)
+    {
+        return new UserDTO
+        (
+            user.UserID,
+            user.Email,
+            user.PersonName,
+            user.Gender
         );
     }
 }

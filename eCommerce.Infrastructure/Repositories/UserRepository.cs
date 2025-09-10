@@ -18,11 +18,11 @@ internal class UserRepository : IUserRepository
     public async Task<ApplicationUser?> AddUser(ApplicationUser user)
     {
         // Generate unique user ID for the user
-        user.UserId = Guid.NewGuid();
+        user.UserID = Guid.NewGuid();
 
         // SQL Query to insert user data into the database
-        string query = @"INSERT INTO public.""Users"" (""UserId"", ""Email"", ""PersonName"", ""Gender"", ""Password"")
-            VALUES (@UserId, @Email, @PersonName, @Gender, @Password)";
+        string query = @"INSERT INTO public.""Users"" (""UserID"", ""Email"", ""PersonName"", ""Gender"", ""Password"")
+            VALUES (@UserID, @Email, @PersonName, @Gender, @Password)";
 
         int rowAffected = await _dbContext.Connection.ExecuteAsync(query, user);
 
@@ -40,11 +40,31 @@ internal class UserRepository : IUserRepository
         ApplicationUser? user = await _dbContext.Connection.QueryFirstOrDefaultAsync<ApplicationUser>
             (query, new { Email = email, Password = password });
 
-        if (user == null)
-        {
-            return null; // If no user found, return null
-        }
+        return user;
+    }
+
+    public async Task<ApplicationUser?> GetUserByUserID(Guid userID)
+    {
+        string query = @"SELECT * FROM public.""Users"" WHERE ""UserID""=@UserID";
+        var parameters = new { UserID = userID };
+
+        ApplicationUser? user = await _dbContext.Connection
+            .QueryFirstOrDefaultAsync<ApplicationUser>(query, parameters);
 
         return user;
+    }
+
+    public async Task<List<ApplicationUser>> GetUsersByUserIDs(List<Guid> ids)
+    {
+        string query = @"SELECT * FROM public.""Users"" WHERE ""UserID"" = ANY(@Ids)";
+        var parameters = new { Ids = ids.ToArray() };
+
+        var results = await _dbContext.Connection
+            .QueryAsync<ApplicationUser>(query, parameters);
+
+        if (results == null)
+            return new List<ApplicationUser>();
+
+        return results.ToList();
     }
 }

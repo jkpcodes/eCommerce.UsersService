@@ -12,7 +12,13 @@ public class DapperDbContext
     public DapperDbContext(IConfiguration configuration)
     {
         _configuration = configuration;
-        string? connectionString = _configuration.GetConnectionString("PostgresConnection");
+        string connectionStringTemplate = _configuration.GetConnectionString("PostgresConnection")!;
+        string connectionString = connectionStringTemplate
+            .Replace("$POSTGRES_HOST", Environment.GetEnvironmentVariable("POSTGRES_HOST")!)
+            .Replace("$POSTGRES_USER", Environment.GetEnvironmentVariable("POSTGRES_USER")!)
+            .Replace("$POSTGRES_PASSWORD", Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")!)
+            .Replace("$POSTGRES_PORT", Environment.GetEnvironmentVariable("POSTGRES_PORT")!)
+            .Replace("$POSTGRES_DB", Environment.GetEnvironmentVariable("POSTGRES_DB")!);
 
         // Create new NpgsqlConnection instance using the connection string
         _connection = new NpgsqlConnection(connectionString);
